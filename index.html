@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <meta name="description" content="Heartbeat Client - Monitor device activity">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="app-icons/icon-192x192.png">
+    <title>Heartbeat Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f6f6f6;
+            --bg-secondary: #ffffff;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --border-color: #e0e0e0;
+            --accent-color: #000000;
+            --accent-hover: #333333;
+            --toggle-bg: #cccccc;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #1a1a1a;
+                --bg-secondary: #2a2a2a;
+                --text-primary: #e0e0e0;
+                --text-secondary: #a0a0a0;
+                --border-color: #404040;
+                --accent-color: #ffffff;
+                --accent-hover: #cccccc;
+                --toggle-bg: #555555;
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+        }
+
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .container {
+            flex: 1;
+            padding: 1.5rem;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .status-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .status-dot.active {
+            background: var(--accent-color);
+            animation: pulse 2s infinite;
+        }
+
+        .status-dot.error {
+            background: var(--text-secondary);
+        }
+
+        .status-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .config-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .config-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+            background: var(--toggle-bg);
+            border-radius: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent-color);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(24px);
+        }
+
+        .button {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent-color);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .button:hover {
+            background: var(--accent-hover);
+        }
+
+        .button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .button.secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .button.secondary:hover {
+            background: var(--bg-primary);
+        }
+
+        .activity-log {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .activity-log h2 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .log-entries {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-entry {
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .install-prompt {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+
+        .install-prompt.show {
+            display: block;
+        }
+
+        .offline-banner {
+            background: var(--accent-color);
+            color: var(--bg-primary);
+            padding: 0.5rem;
+            text-align: center;
+            display: none;
+        }
+
+        .offline-banner.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-banner" id="offlineBanner" role="alert" aria-live="assertive">
+        You are currently offline. Heartbeats will be sent when connection is restored.
+    </div>
+
+    <div class="container">
+        <div class="install-prompt" id="installPrompt">
+            <p>Install this app on your device for easy access and offline support.</p>
+            <button class="button" id="installButton">Install App</button>
+        </div>
+
+        <div class="status-card" role="status" aria-live="polite">
+            <div class="status-indicator">
+                <div class="status-dot" id="statusDot" aria-hidden="true"></div>
+                <span class="status-text" id="statusText" aria-label="Connection status">Initializing...</span>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="beatCount">0</div>
+                    <div class="stat-label">Beats Sent</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="lastBeat">--:--</div>
+                    <div class="stat-label">Last Beat</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="config-section">
+            <h2>Configuration</h2>
+            <div class="form-group">
+                <label for="serverUrl">Server URL</label>
+                <input type="url" id="serverUrl" placeholder="https://your.heartbeat.domain" aria-label="Server URL" aria-required="true">
+            </div>
+            <div class="form-group">
+                <label for="authToken">Auth Token</label>
+                <input type="password" id="authToken" placeholder="Your authentication token" aria-label="Authentication token" aria-required="true">
+            </div>
+            <div class="form-group">
+                <label for="deviceName">Device Name</label>
+                <input type="text" id="deviceName" placeholder="Mobile Device" aria-label="Device name" aria-required="true">
+            </div>
+            <div class="form-group">
+                <label for="vapidPublicKey">VAPID Public Key (for Server Checks)</label>
+                <input type="password" id="vapidPublicKey" placeholder="Enter VAPID public key from server" aria-label="VAPID public key for server checks">
+            </div>
+            <div class="toggle-group">
+                <label for="enableToggle">Enable Heartbeat</label>
+                <div class="toggle-switch" id="enableToggle" role="switch" aria-checked="false" tabindex="0" aria-label="Enable heartbeat monitoring"></div>
+            </div>
+            <div class="toggle-group">
+                <label for="activityToggle">Activity Detection</label>
+                <div class="toggle-switch" id="activityToggle" role="switch" aria-checked="false" tabindex="0" aria-label="Enable activity detection"></div>
+            </div>
+            <button class="button" id="saveConfig" aria-label="Save configuration settings">Save Configuration</button>
+            <button class="button secondary" id="requestNotifications" style="margin-top: 0.5rem;" aria-label="Enable browser notifications">Enable Notifications</button>
+            <button class="button secondary" id="enablePush" style="margin-top: 0.5rem;" aria-label="Enable server-initiated heartbeat checks">Enable Server Checks</button>
+            <button class="button secondary" id="testBeat" style="margin-top: 0.5rem;" aria-label="Send a test heartbeat immediately">Send Test Beat</button>
+        </div>
+
+        <div class="activity-log">
+            <h2>Activity Log</h2>
+            <div class="log-entries" id="logEntries" role="log" aria-label="Activity log entries" aria-live="polite">
+                <div class="log-entry">Waiting for activity...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+{
+  "name": "heartbeat-pwa",
+  "version": "1.0.0",
+  "description": "Progressive Web App client for Heartbeat monitoring with server-initiated checks",
+  "main": "app.js",
+  "scripts": {
+    "lint": "eslint --fix *.js",
+    "lint:check": "eslint *.js",
+    "validate:html": "html-validate *.html",
+    "validate:json": "python3 -m json.tool manifest.json > /dev/null",
+    "lint:md": "markdownlint --disable MD013 MD002 MD041 *.md",
+    "test": "npm run lint:check && npm run validate:json",
+    "build": "npm run test",
+    "precommit": "pre-commit run --all-files",
+    "setup": "npm install && pre-commit install",
+    "serve": "python3 -m http.server 8000",
+    "serve:node": "npx serve ."
+  },
+  "keywords": [
+    "heartbeat",
+    "pwa",
+    "progressive-web-app",
+    "monitoring",
+    "push-notifications",
+    "service-worker",
+    "offline",
+    "background-sync"
+  ],
+  "author": "Heartbeat Team",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "html-validate": "^8.7.3",
+    "markdownlint-cli": "^0.38.0",
+    "serve": "^14.2.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "> 1%",
+    "not dead"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/5HT2B/heartbeat-pwa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/5HT2B/heartbeat-pwa/issues"
+  },
+  "homepage": "https://github.com/5HT2B/heartbeat-pwa#readme"
+}
