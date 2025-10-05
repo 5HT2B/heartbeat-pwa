@@ -23,7 +23,7 @@ The PWA can be installed on mobile devices (iOS/Android) and desktop browsers.
 
 1. Clone or download the PWA files:
 ```bash
-git clone https://github.com/pfeifferj/heartbeat-pwa.git
+git clone https://github.com/5HT2B/heartbeat-pwa.git
 cd heartbeat-pwa
 ```
 
